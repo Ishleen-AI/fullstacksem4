@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon Digital Bank</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-gray: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        /* Balance Display - Flexbox */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            flex: 1;
+            min-width: 280px;
+            transition: transform 0.2s;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+        }
+
+        .card h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        /* Transaction Area - Responsive Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Media Queries for Responsive Layout */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard {
+                flex-direction: column;
+            }
+
+            .card {
+                min-width: 100%;
+            }
+        }
+
+        .transaction-box {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .btn-deposit { background-color: var(--success); }
+        .btn-deposit:hover { background-color: #059669; }
+
+        .btn-withdraw { background-color: var(--danger); }
+        .btn-withdraw:hover { background-color: #dc2626; }
+
+        /* Feedback Messages */
+        #message-box {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .msg-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; display: block !important; }
+        .msg-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; display: block !important; }
+
+        /* History Table */
+        .history-box {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .type-deposit { color: var(--success); font-weight: 600; }
+        .type-withdraw { color: var(--danger); font-weight: 600; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Horizon Digital Bank</h1>
+            <p>Your secure personal finance dashboard</p>
+        </header>
+
+        <!-- Balance Dashboard -->
+        <div class="dashboard">
+            <div class="card balance-card">
+                <h2>Total Balance</h2>
+                <div class="amount" id="balance-display">$1,250.00</div>
+            </div>
+            <div class="card">
+                <h2>Savings Goal</h2>
+                <div class="amount" style="color: var(--primary)">$5,000.00</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Transaction Management -->
+            <div class="transaction-box">
+                <h2>Manage Funds</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Deposit or withdraw from your account</p>
+                
+                <div class="form-group">
+                    <label for="amount-input">Amount ($)</label>
+                    <input type="number" id="amount-input" placeholder="0.00" min="0" step="0.01">
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-deposit" id="deposit-btn">Deposit</button>
+                    <button class="btn-withdraw" id="withdraw-btn">Withdraw</button>
+                </div>
+
+                <div id="message-box"></div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="history-box">
+                <h2 style="margin-bottom: 20px;">Recent Activity</h2>
+                <ul class="history-list" id="history-list">
+                    <li class="history-item">
+                        <span>Initial Balance</span>
+                        <span class="type-deposit">+$1,250.00</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let balance = 1250.00;
+
+        // DOM Elements
+        const balanceDisplay = document.getElementById('balance-display');
+        const amountInput = document.getElementById('amount-input');
+        const depositBtn = document.getElementById('deposit-btn');
+        const withdrawBtn = document.getElementById('withdraw-btn');
+        const messageBox = document.getElementById('message-box');
+        const historyList = document.getElementById('history-list');
+
+        // Helper: Format currency
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            }).format(num);
+        }
+
+        // Helper: Show Feedback
+        function showFeedback(text, type) {
+            messageBox.textContent = text;
+            messageBox.className = type === 'success' ? 'msg-success' : 'msg-error';
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                messageBox.className = '';
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        // Helper: Add to history
+        function addToHistory(type, amount) {
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            
+            const typeSpan = document.createElement('span');
+            typeSpan.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            
+            const amountSpan = document.createElement('span');
+            amountSpan.className = type === 'deposit' ? 'type-deposit' : 'type-withdraw';
+            amountSpan.textContent = (type === 'deposit' ? '+' : '-') + formatCurrency(amount);
+            
+            li.appendChild(typeSpan);
+            li.appendChild(amountSpan);
+            historyList.prepend(li); // Show newest at top
+        }
+
+        // Validation & Core Logic
+        function handleTransaction(type) {
+            const amount = parseFloat(amountInput.value);
+
+            // Validation
+            if (isNaN(amount) || amount <= 0) {
+                showFeedback('Please enter a valid positive amount.', 'error');
+                return;
+            }
+
+            if (type === 'withdraw' && amount > balance) {
+                showFeedback('Insufficient funds for this withdrawal.', 'error');
+                return;
+            }
+
+            // Update State
+            if (type === 'deposit') {
+                balance += amount;
+                showFeedback(`Successfully deposited ${formatCurrency(amount)}`, 'success');
+            } else {
+                balance -= amount;
+                showFeedback(`Successfully withdrew ${formatCurrency(amount)}`, 'success');
+            }
+
+            // Update UI
+            balanceDisplay.textContent = formatCurrency(balance);
+            addToHistory(type, amount);
+            amountInput.value = '';
+            
+            // Visual feedback on balance
+            balanceDisplay.style.transform = 'scale(1.05)';
+            setTimeout(() => balanceDisplay.style.transform = 'scale(1)', 200);
+        }
+
+        // Event Listeners
+        depositBtn.addEventListener('click', () => handleTransaction('deposit'));
+        withdrawBtn.addEventListener('click', () => handleTransaction('withdraw'));
+
+        // Handle Enter key in input
+        amountInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleTransaction('deposit'); // Default to deposit on enter
+            }
+        });
+    </script>
+</body>
+</html>

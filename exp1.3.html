@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Experiment 1.3</title>
+    <style>
+        /* CSS Variables for Theme Management */
+        :root {
+            --bg-color: #f4f7f6;
+            --sidebar-bg: #2c3e50;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --accent-color: #3498db;
+            --border-color: #dddddd;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --sidebar-text: #ecf0f1;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --sidebar-bg: #111111;
+            --header-bg: #2d2d2d;
+            --card-bg: #2d2d2d;
+            --text-main: #f4f7f6;
+            --text-muted: #aaaaaa;
+            --accent-color: #3498db;
+            --border-color: #444444;
+            --shadow: 0 4px 6px rgba(0,0,0,0.5);
+            --sidebar-text: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: grid;
+            /* Grid Layout Definition */
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar main";
+            grid-template-columns: 240px 1fr;
+            grid-template-rows: 60px 1fr;
+        }
+
+        /* Sidebar Styling */
+        aside {
+            grid-area: sidebar;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        aside h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav li {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        nav li:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Header Styling */
+        header {
+            grid-area: header;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Main Content Styling */
+        main {
+            grid-area: main;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .card h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .large-card {
+            grid-column: span 2;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                grid-template-areas: 
+                    "header"
+                    "main";
+                grid-template-columns: 1fr;
+            }
+            aside {
+                display: none; /* Hide sidebar on mobile for simplicity */
+            }
+            .large-card {
+                grid-column: span 1;
+            }
+        }
+
+        /* Modal for notifications (instead of alert) */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <h2>Admin Panel</h2>
+        <nav>
+            <ul>
+                <li>Dashboard</li>
+                <li>Users</li>
+                <li>Settings</li>
+                <li>Reports</li>
+                <li>Logout</li>
+            </ul>
+        </nav>
+    </aside>
+
+    <header>
+        <div class="user-info">Welcome, Admin</div>
+        <button class="theme-toggle" id="themeToggle">
+            <span id="themeText">Switch to Dark Mode</span>
+        </button>
+    </header>
+
+    <main>
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Total Users</h3>
+                <div class="value">1,240</div>
+            </div>
+            <div class="card">
+                <h3>Revenue</h3>
+                <div class="value">$12,450</div>
+            </div>
+            <div class="card">
+                <h3>Active Sessions</h3>
+                <div class="value">84</div>
+            </div>
+            <div class="card">
+                <h3>Errors</h3>
+                <div class="value" style="color: #e74c3c;">2</div>
+            </div>
+        </div>
+
+        <div class="card large-card">
+            <h3>System Overview</h3>
+            <p>This dashboard is built using CSS Grid and manages state with CSS Variables. Theme preferences are persisted in your browser's local storage.</p>
+            <br>
+            <p style="color: var(--text-muted);">Last updated: Just now</p>
+        </div>
+    </main>
+
+    <div id="notification">Theme updated successfully!</div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeText = document.getElementById('themeText');
+        const notification = document.getElementById('notification');
+
+        // Function to show toast notification
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+        }
+
+        // Initialize theme from localStorage
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateToggleButton(currentTheme);
+
+        function updateToggleButton(theme) {
+            themeText.textContent = theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            let newTheme = theme === 'light' ? 'dark' : 'light';
+
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            updateToggleButton(newTheme);
+            showNotification(`Applied ${newTheme} mode`);
+        });
+
+        // Event delegation for navigation items
+        document.querySelector('nav ul').addEventListener('click', (e) => {
+            if(e.target.tagName === 'LI') {
+                showNotification(`Navigating to ${e.target.textContent}...`);
+            }
+        });
+    </script>
+</body>
+</html>

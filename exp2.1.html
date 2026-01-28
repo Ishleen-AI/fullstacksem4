@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Character Counter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Smooth transitions for progress bar and alerts */
+        .transition-all { transition: all 0.3s ease; }
+        .progress-bar { transition: width 0.3s ease-out, background-color 0.3s ease; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-900">
+
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden transition-all">
+        
+        <!-- Header Section -->
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 tracking-tight">Live Character Counter</h1>
+            
+                </div>
+            </div>
+            
+            <button id="toggleLimitBtn" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400" title="Adjust Limit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </button>
+        </div>
+
+        <!-- Limit Configuration (Hidden by default) -->
+        <div id="limitConfig" class="hidden px-6 py-3 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+            <label class="text-sm font-medium text-blue-700">Set Character Limit:</label>
+            <input type="number" id="limitInput" value="280" class="w-24 px-2 py-1 border border-blue-200 rounded text-sm outline-none focus:ring-2 focus:ring-blue-400">
+        </div>
+
+        <!-- Editor Section -->
+        <div class="p-6">
+            <div class="relative">
+                <textarea id="mainInput" 
+                    class="w-full h-64 p-4 text-lg border-2 border-slate-200 rounded-xl outline-none transition-all resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                    placeholder="Start typing your message here..."></textarea>
+                
+                <!-- Action Buttons -->
+                <div class="absolute bottom-4 right-4 flex gap-2">
+                    <button id="clearBtn" class="p-2 bg-white/80 backdrop-blur border border-slate-200 text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all shadow-sm" title="Clear All">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                    <button id="copyBtn" class="p-2 bg-white/80 backdrop-blur border border-slate-200 text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all shadow-sm flex items-center gap-2" title="Copy to Clipboard">
+                        <span id="copyIcon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Bar Section -->
+            <div class="mt-6">
+                <div class="flex justify-between items-end mb-2">
+                    <span id="charCounter" class="text-sm font-semibold text-slate-600 flex items-center gap-1.5">
+                        0 / 280 Characters
+                    </span>
+                    <span id="wordCounter" class="text-sm font-medium text-slate-400">
+                        0 Words
+                    </span>
+                </div>
+                
+                <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progressBar" class="h-full w-0 bg-blue-500 progress-bar rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Status Bar -->
+        <div id="statusBar" class="px-6 py-4 flex items-center justify-between text-xs font-medium uppercase tracking-wider bg-slate-50 text-slate-500 transition-colors">
+            <div id="statusMsg">Input is within limits</div>
+            <div id="readTime">Reading Time: 0 min</div>
+        </div>
+    </div>
+
+    <!-- Feedback Message -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-slate-800 text-white text-sm rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        const textarea = document.getElementById('mainInput');
+        const limitInput = document.getElementById('limitInput');
+        const charLabel = document.getElementById('charCounter');
+        const wordLabel = document.getElementById('wordCounter');
+        const progressBar = document.getElementById('progressBar');
+        const statusBar = document.getElementById('statusBar');
+        const statusMsg = document.getElementById('statusMsg');
+        const readTimeLabel = document.getElementById('readTime');
+        const limitConfig = document.getElementById('limitConfig');
+        const toggleBtn = document.getElementById('toggleLimitBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const toast = document.getElementById('toast');
+
+        function updateUI() {
+            const text = textarea.value;
+            const limit = parseInt(limitInput.value) || 280;
+            const charCount = text.length;
+            
+            // Calculate words
+            const trimmed = text.trim();
+            const wordCount = trimmed === '' ? 0 : trimmed.split(/\s+/).length;
+            
+            // Calculate progress
+            const progress = Math.min((charCount / limit) * 100, 100);
+            const isOverLimit = charCount > limit;
+            const isNearLimit = charCount >= limit * 0.8 && charCount <= limit;
+
+            // Update Labels
+            charLabel.textContent = `${charCount} / ${limit} Characters`;
+            wordLabel.textContent = `${wordCount} ${wordCount === 1 ? 'Word' : 'Words'}`;
+            readTimeLabel.textContent = `Reading Time: ${Math.ceil(wordCount / 200)} min`;
+
+            // Update Progress Bar
+            progressBar.style.width = `${progress}%`;
+            
+            // Update Colors and Status
+            if (isOverLimit) {
+                textarea.className = 'w-full h-64 p-4 text-lg border-2 rounded-xl outline-none transition-all resize-none border-red-300 focus:border-red-500 bg-red-50/30';
+                progressBar.className = 'h-full bg-red-500 progress-bar rounded-full';
+                statusBar.className = 'px-6 py-4 flex items-center justify-between text-xs font-medium uppercase tracking-wider bg-red-50 text-red-700';
+                statusMsg.innerHTML = `<span class="flex items-center gap-1">Warning: Exceeded by ${charCount - limit}</span>`;
+                charLabel.className = 'text-sm font-semibold text-red-600 flex items-center gap-1.5';
+            } else if (isNearLimit) {
+                textarea.className = 'w-full h-64 p-4 text-lg border-2 rounded-xl outline-none transition-all resize-none border-amber-300 focus:border-amber-500 bg-amber-50/30';
+                progressBar.className = 'h-full bg-amber-400 progress-bar rounded-full';
+                statusBar.className = 'px-6 py-4 flex items-center justify-between text-xs font-medium uppercase tracking-wider bg-slate-50 text-slate-500';
+                statusMsg.textContent = 'Almost at the limit!';
+                charLabel.className = 'text-sm font-semibold text-amber-600 flex items-center gap-1.5';
+            } else {
+                textarea.className = 'w-full h-64 p-4 text-lg border-2 border-slate-200 rounded-xl outline-none transition-all resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50';
+                progressBar.className = 'h-full bg-blue-500 progress-bar rounded-full';
+                statusBar.className = 'px-6 py-4 flex items-center justify-between text-xs font-medium uppercase tracking-wider bg-slate-50 text-slate-500';
+                statusMsg.textContent = 'Input is within limits';
+                charLabel.className = 'text-sm font-semibold text-slate-600 flex items-center gap-1.5';
+            }
+        }
+
+        // Event Listeners
+        textarea.addEventListener('input', updateUI);
+        limitInput.addEventListener('input', updateUI);
+
+        toggleBtn.addEventListener('click', () => {
+            limitConfig.classList.toggle('hidden');
+        });
+
+        clearBtn.addEventListener('click', () => {
+            textarea.value = '';
+            updateUI();
+        });
+
+        copyBtn.addEventListener('click', () => {
+            if (!textarea.value) return;
+            
+            // Use fallback copy method as per instructions
+            const temp = document.createElement("textarea");
+            temp.value = textarea.value;
+            document.body.appendChild(temp);
+            temp.select();
+            try {
+                document.execCommand('copy');
+                // Show toast feedback
+                toast.classList.replace('opacity-0', 'opacity-100');
+                setTimeout(() => toast.classList.replace('opacity-100', 'opacity-0'), 2000);
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+            document.body.removeChild(temp);
+        });
+
+        // Initialize UI
+        updateUI();
+    </script>
+</body>
+</html>
